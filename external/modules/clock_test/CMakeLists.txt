@@ -10,4 +10,4 @@ set(HEADERS
 include_directories(include)
 
 add_library(clock_test MODULE ${SOURCES} ${HEADERS})
-target_link_libraries(clock_test PRIVATE lms)
+target_link_libraries(clock_test PRIVATE lmscore)

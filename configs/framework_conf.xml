@@ -1,6 +1,6 @@
 <framework>
 	<execution>
-		<clock enabled="true" unit="hz">100</clock>
+		<clock enabled="true" unit="hz" value="100" />
 	</execution>
 	<modulesToEnable>
 		<module>clock_test</module>
