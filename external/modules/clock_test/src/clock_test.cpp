@@ -2,18 +2,17 @@
 
 bool ClockTest::initialize() {
     firstCycle = true;
-    config = getConfig();
 
-    std::string unit = config->get<std::string>("unit", "hz");
+    std::string unit = config().get<std::string>("unit", "hz");
     if(unit == "hz") {
-        configuredCycleTime = lms::extra::PrecisionTime::fromMicros(1000000 /
-            config->get<int>("value"));
+        configuredCycleTime = lms::Time::fromMicros(1000000 /
+            config().get<int>("value"));
     } else if(unit == "ms") {
-        configuredCycleTime = lms::extra::PrecisionTime::fromMillis(
-            config->get<int>("value"));
+        configuredCycleTime = lms::Time::fromMillis(
+            config().get<int>("value"));
     } else if(unit == "us") {
-        configuredCycleTime = lms::extra::PrecisionTime::fromMicros(
-            config->get<int>("value"));
+        configuredCycleTime = lms::Time::fromMicros(
+            config().get<int>("value"));
     } else {
         logger.error("init") << "Invalid unit " << unit;
         return false;
@@ -29,20 +28,32 @@ bool ClockTest::deinitialize() {
 }
 
 bool ClockTest::cycle() {
-    using lms::extra::PrecisionTime;
+    using lms::Time;
+
+    if(firstCycle) {
+        startupTimestamp = Time::now();
+        cycleCount = 0;
+    } else {
+        cycleCount ++;
+        logger.info() << (Time::now() - startupTimestamp) / cycleCount;
+        logger.info() << (Time::now() - startupTimestamp - configuredCycleTime * cycleCount);
+        logger.info() << cycleCount;
+    }
 
     if(! firstCycle) {
-        PrecisionTime now = PrecisionTime::now();
-        PrecisionTime realCycleTime = now - lastCycle;
-        PrecisionTime currentDiff = realCycleTime - configuredCycleTime;
+        Time now = Time::now();
+        Time realCycleTime = now - lastCycle;
+        Time currentDiff = realCycleTime - configuredCycleTime;
         sumDiff += currentDiff;
 
         logger.info("realCycle") << realCycleTime << " " << currentDiff
                                  << " " << sumDiff;
     }
 
-    lastCycle = PrecisionTime::now();
+    lastCycle = Time::now();
     firstCycle = false;
+
+    //PrecisionTime::fromMillis(9).sleep();
 
     return true;
 }
